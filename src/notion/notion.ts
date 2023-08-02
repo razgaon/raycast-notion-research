@@ -10,7 +10,10 @@ const notion = new Client({ auth: preferences.notionApiKey });
 
 export async function createPage(articleMetadata: ArticleMetadata) {
   const { authors, categoryNames, id, journal, pdf, summary, title } = articleMetadata;
-  console.log([...categoryNames.map((x) => ({ name: x }))]);
+
+  // Get only the date
+  const date = new Date(articleMetadata.date).toISOString().split("T")[0];
+
   const response = await notion.pages.create({
     parent: { database_id: preferences.databaseKey },
     icon: {
@@ -42,6 +45,9 @@ export async function createPage(articleMetadata: ArticleMetadata) {
       },
       URL: {
         url: pdf,
+      },
+      Date: {
+        date: { start: date },
       },
     },
     children: [

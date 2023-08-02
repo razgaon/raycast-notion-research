@@ -35,7 +35,7 @@
   "dependencies": {
     "@notionhq/client": "^2.2.9",
     "@raycast/api": "^1.56.0",
-    "arxivjs": "^0.0.5",
+    "arxivjs": "^0.0.9",
     "use-debounce": "^9.0.4"
   },
   "devDependencies": {

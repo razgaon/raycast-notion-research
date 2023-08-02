@@ -12,8 +12,8 @@ dependencies:
     specifier: ^1.56.0
     version: 1.56.0(@types/node@18.8.3)(@types/react@18.0.9)
   arxivjs:
-    specifier: ^0.0.5
-    version: 0.0.5(typescript@4.4.3)
+    specifier: ^0.0.9
+    version: 0.0.9(typescript@4.4.3)
   use-debounce:
     specifier: ^9.0.4
     version: 9.0.4(react@18.1.0)
@@ -941,8 +941,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
-  /arxivjs@0.0.5(typescript@4.4.3):
-    resolution: {integrity: sha512-qVGwRH9/vk3gtldwi7Xseu1Jclcf59nV1/OorqGN90NJmNQ/WaQcp2W9rh6yDxGP9SkS3PcDAjH8jjvKCGd0Kg==}
+  /arxivjs@0.0.9(typescript@4.4.3):
+    resolution: {integrity: sha512-U5Ff8Tkotdr0NWGLMS3e6KLre6BjkHXG+gJmlUbqD+vBvhd/p2pGSYSB0p/w5v6Kf3IEoYwE+4FpcN8wF0BuTQ==}
     dependencies:
       '@changesets/cli': 2.26.2
       feedme: 2.0.2

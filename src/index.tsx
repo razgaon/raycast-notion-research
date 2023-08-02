@@ -62,8 +62,17 @@ export default function Command() {
           </ActionPanel>
         }
         accessories={[
-          { text: { value: articleMetadata?.authors[0], color: Color.Orange }, icon: Icon.Person },
-          { tag: { value: articleMetadata?.categoryNames[0], color: Color.Magenta }, icon: Icon.Stars },
+          {
+            text: { value: articleMetadata?.authors ? articleMetadata?.authors[0] : "", color: Color.Orange },
+            icon: Icon.Person,
+          },
+          {
+            tag: {
+              value: articleMetadata?.categoryNames ? articleMetadata.categoryNames[0] : "",
+              color: Color.Magenta,
+            },
+            icon: Icon.Stars,
+          },
         ]}
       />
     </List>
