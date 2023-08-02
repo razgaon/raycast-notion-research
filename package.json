@@ -14,11 +14,19 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "notion_token",
+          "name": "notionApiKey",
           "title": "Notion Token",
           "placeholder": "Your Notion api token...",
           "description": "Notion token to allow access to the database",
           "type": "password",
+          "required": true
+        },
+        {
+          "name": "databaseKey",
+          "title": "Notion Database Key",
+          "placeholder": "Your Database Key...",
+          "description": "Notion database identifier",
+          "type": "textfield",
           "required": true
         }
       ]

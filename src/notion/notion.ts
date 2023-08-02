@@ -12,7 +12,7 @@ export async function createPage(articleMetadata: ArticleMetadata) {
   const { authors, categoryNames, id, journal, pdf, summary, title } = articleMetadata;
   console.log([...categoryNames.map((x) => ({ name: x }))]);
   const response = await notion.pages.create({
-    parent: { database_id: "5b11757fc71f44b9ab2326f211280730" },
+    parent: { database_id: preferences.databaseKey },
     icon: {
       emoji: "📄",
     },

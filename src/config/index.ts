@@ -1,7 +1,5 @@
 export interface Preferences {
   notionApiKey: string;
-  taskDatabaseKey?: string;
+  databaseKey: string;
   readerApiKey?: string;
 }
-
-
