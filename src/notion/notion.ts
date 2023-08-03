@@ -69,10 +69,21 @@ export async function createPage(articleMetadata: ArticleMetadata) {
                 content: summary.trim(),
               },
             },
+          ],
+        },
+      },
+      {
+        object: "block",
+        type: "paragraph",
+        paragraph: {
+          rich_text: [
             {
               type: "text",
+              annotations: {
+                bold: true,
+              },
               text: {
-                content: authors.map((x) => ({ name: x })).join(", "),
+                content: authors.join(", "),
               },
             },
           ],
