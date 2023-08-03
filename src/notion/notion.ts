@@ -66,7 +66,13 @@ export async function createPage(articleMetadata: ArticleMetadata) {
             {
               type: "text",
               text: {
-                content: summary,
+                content: summary.trim(),
+              },
+            },
+            {
+              type: "text",
+              text: {
+                content: authors.map((x) => ({ name: x })).join(", "),
               },
             },
           ],
@@ -74,5 +80,4 @@ export async function createPage(articleMetadata: ArticleMetadata) {
       },
     ],
   });
-  console.log(response);
 }

@@ -28,6 +28,14 @@
           "description": "Notion database identifier",
           "type": "textfield",
           "required": true
+        },
+        {
+          "name": "readerApiKey",
+          "title": "Readwise Reader Key",
+          "placeholder": "Your Readwise Reader Key...",
+          "description": "Readwise Reader Api Token",
+          "type": "textfield",
+          "required": false
         }
       ]
     }
@@ -35,7 +43,8 @@
   "dependencies": {
     "@notionhq/client": "^2.2.9",
     "@raycast/api": "^1.56.0",
-    "arxivjs": "^0.0.9",
+    "@raycast/utils": "^1.9.0",
+    "arxivjs": "^0.0.11",
     "use-debounce": "^9.0.4"
   },
   "devDependencies": {

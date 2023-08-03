@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { showToast, Toast, ActionPanel, Detail, List, Icon, Color, Action, closeMainWindow } from "@raycast/api";
-import { setTimeout } from "timers/promises";
+import { useReadwiseFetch } from "./readwise/index";
+import { showToast, Toast, ActionPanel, Detail, List, Icon, Color, Action } from "@raycast/api";
+// import { setTimeout } from "timers/promises";
 import { ArxivClient, ArticleMetadata } from "arxivjs";
 import { createPage } from "./notion/notion";
 import { useDebounce } from "use-debounce";
@@ -10,8 +11,11 @@ export default function Command() {
 
   const [searchText, setSearchText] = useState("");
   const [error, setError] = useState<Error>();
-  const [debouncedText] = useDebounce(searchText, 800, { leading: true });
+  const [debouncedText] = useDebounce(searchText, 1000, { leading: true });
   const [articleMetadata, setArticleMetadata] = useState(null as ArticleMetadata | null);
+  const [body, setBody] = useState("");
+
+  useReadwiseFetch(body);
 
   useEffect(() => {
     // This extension is made for copy paste, otherwise it calls the api too often.
@@ -41,8 +45,22 @@ export default function Command() {
     if (articleMetadata) {
       // Send to reader
       createPage(articleMetadata);
-      await setTimeout(500);
-      closeMainWindow();
+
+      const body = {
+        category: "pdf",
+        url: articleMetadata.pdf,
+        tags: [...articleMetadata.categoryNames],
+        title: articleMetadata.title,
+        summary: articleMetadata.summary,
+        author: articleMetadata.authors[0],
+        published_at: articleMetadata.date,
+      };
+
+      if (articleMetadata.journal !== "None") {
+        body.tags.push(articleMetadata.journal);
+      }
+
+      setBody(JSON.stringify(body));
     }
   };
 
@@ -58,7 +76,11 @@ export default function Command() {
         title={articleMetadata?.title ?? "No papers yet..."}
         actions={
           <ActionPanel>
-            <Action.Push title="Show Details" onPush={onPush} target={<Detail markdown="Created successfully!" />} />
+            <Action.Push
+              title="Show Details"
+              onPush={() => onPush()}
+              target={<Detail markdown="Page created successfully!" />}
+            />
           </ActionPanel>
         }
         accessories={[
