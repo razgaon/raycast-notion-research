@@ -1,6 +1,7 @@
 import { useFetch as useRayFetch } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../config/index";
+import { ReaderRequestBody, ReaderResponse } from "./types";
 
 const readerUrl = "https://readwise.io/api/v3/save/";
 
@@ -8,18 +9,18 @@ const preferences = getPreferenceValues<Preferences>();
 
 const READWISE_API_KEY = preferences.readerApiKey;
 
-export const useReadwiseFetch = (body: string) => {
+export const useReadwiseFetch = (readerRequestBody: ReaderRequestBody): ReaderResponse => {
   const reqBody = {
     method: "POST",
-    body,
+    body: JSON.stringify(readerRequestBody),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Token ${READWISE_API_KEY}`,
     },
-    execute: READWISE_API_KEY && body ? true : false,
+    execute: READWISE_API_KEY && Object.keys(readerRequestBody).length > 0 ? true : false,
   };
-  console.log(reqBody);
+
   const res = useRayFetch(readerUrl, reqBody);
 
-  return res;
-}; 
+  return res.data as ReaderResponse;
+};

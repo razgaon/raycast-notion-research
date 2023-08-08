@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { useReadwiseFetch } from "./readwise/index";
-import { showToast, Toast, ActionPanel, Detail, List, Icon, Color, Action } from "@raycast/api";
+import { useReadwiseFetch } from "./reader/index";
+import { showToast, Toast, List } from "@raycast/api";
 // import { setTimeout } from "timers/promises";
 import { ArxivClient, ArticleMetadata } from "arxivjs";
-import { createPage } from "./notion/notion";
+import { createArticlePage, updateArticlePageReaderUrl } from "./notion/notion";
 import { useDebounce } from "use-debounce";
+import { ArticleItem } from "./components/articleItem";
+import { ReaderRequestBody, ReaderResponse } from "./reader/types";
+import { addReferencesToPage } from "./semanticScholar";
 
 export default function Command() {
   const client = new ArxivClient();
@@ -13,12 +16,28 @@ export default function Command() {
   const [error, setError] = useState<Error>();
   const [debouncedText] = useDebounce(searchText, 1000, { leading: true });
   const [articleMetadata, setArticleMetadata] = useState(null as ArticleMetadata | null);
-  const [body, setBody] = useState("");
+  const [body, setBody] = useState({} as ReaderRequestBody);
+  const [pageId, setPageId] = useState("");
 
-  useReadwiseFetch(body);
+  const readerResponse: ReaderResponse = useReadwiseFetch(body);
 
   useEffect(() => {
-    // This extension is made for copy paste, otherwise it calls the api too often.
+    async function updateUrl() {
+      try {
+        if (body && body.url !== "" && pageId !== "") {
+          console.log("Updating page with URL: ", readerResponse.url);
+          await updateArticlePageReaderUrl(pageId, body.url);
+          // await addReferencesToPage(body);
+        }
+      } catch (e: any) {
+        setError(e);
+      }
+    }
+
+    updateUrl();
+  }, [body]);
+
+  useEffect(() => {
     async function getArticle() {
       try {
         const articleMetadata: ArticleMetadata = await client.getArticle(debouncedText);
@@ -42,26 +61,27 @@ export default function Command() {
   }, [error]);
 
   const onPush = async () => {
-    if (articleMetadata) {
-      // Send to reader
-      createPage(articleMetadata);
+    if (!articleMetadata) return;
 
-      const body = {
-        category: "pdf",
-        url: articleMetadata.pdf,
-        tags: [...articleMetadata.categoryNames],
-        title: articleMetadata.title,
-        summary: articleMetadata.summary,
-        author: articleMetadata.authors[0],
-        published_at: articleMetadata.date,
-      };
+    const res = await createArticlePage(articleMetadata);
+    setPageId(res.id);
 
-      if (articleMetadata.journal !== "None") {
-        body.tags.push(articleMetadata.journal);
-      }
+    const readerRequestbody: ReaderRequestBody = {
+      category: "pdf",
+      url: articleMetadata.pdf.replace(/^http:/, "https:"), // Replace only the "http:" part of the URL with "https:"
+      tags: [...articleMetadata.categoryNames],
+      title: articleMetadata.title,
+      summary: articleMetadata.summary,
+      author: articleMetadata.authors[0],
+      published_at: articleMetadata.date,
+    };
 
-      setBody(JSON.stringify(body));
+    // Add the journal to tags if it is not "None"
+    if (articleMetadata.journal !== "None") {
+      readerRequestbody.tags.push(articleMetadata.journal);
     }
+
+    setBody(readerRequestbody);
   };
 
   return (
@@ -71,32 +91,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       throttle={true}
     >
-      <List.Item
-        icon="list-icon.png"
-        title={articleMetadata?.title ?? "No papers yet..."}
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Show Details"
-              onPush={() => onPush()}
-              target={<Detail markdown="Page created successfully!" />}
-            />
-          </ActionPanel>
-        }
-        accessories={[
-          {
-            text: { value: articleMetadata?.authors ? articleMetadata?.authors[0] : "", color: Color.Orange },
-            icon: Icon.Person,
-          },
-          {
-            tag: {
-              value: articleMetadata?.categoryNames ? articleMetadata.categoryNames[0] : "",
-              color: Color.Magenta,
-            },
-            icon: Icon.Stars,
-          },
-        ]}
-      />
+      <ArticleItem articleMetadata={articleMetadata} onPush={onPush} />
     </List>
   );
 }

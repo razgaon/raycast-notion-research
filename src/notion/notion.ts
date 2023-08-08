@@ -3,12 +3,13 @@ import { getPreferenceValues } from "@raycast/api";
 import { ArticleMetadata } from "arxivjs";
 import { Status } from "./config";
 import { Preferences } from "../config/index";
+import { splitTextAndEquations } from "./utils";
 
 const preferences = getPreferenceValues<Preferences>();
 
 const notion = new Client({ auth: preferences.notionApiKey });
 
-export async function createPage(articleMetadata: ArticleMetadata) {
+export async function createArticlePage(articleMetadata: ArticleMetadata) {
   const { authors, categoryNames, id, journal, pdf, summary, title } = articleMetadata;
 
   // Get only the date
@@ -62,14 +63,7 @@ export async function createPage(articleMetadata: ArticleMetadata) {
         object: "block",
         type: "paragraph",
         paragraph: {
-          rich_text: [
-            {
-              type: "text",
-              text: {
-                content: summary.trim(),
-              },
-            },
-          ],
+          rich_text: splitTextAndEquations(summary.trim()),
         },
       },
       {
@@ -90,5 +84,18 @@ export async function createPage(articleMetadata: ArticleMetadata) {
         },
       },
     ],
+  });
+
+  return response;
+}
+
+export async function updateArticlePageReaderUrl(pageId: string, readerUrl: string) {
+  return notion.pages.update({
+    page_id: pageId,
+    properties: {
+      "Reader Url": {
+        url: readerUrl,
+      },
+    },
   });
 }
