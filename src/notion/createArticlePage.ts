@@ -9,7 +9,7 @@ const preferences = getPreferenceValues<Preferences>();
 
 const notion = new Client({ auth: preferences.notionApiKey });
 
-export async function createArticlePage(articleMetadata: ArticleMetadata) {
+export async function createArticleNotionPage(articleMetadata: ArticleMetadata) {
   const { authors, categoryNames, id, journal, pdf, summary, title } = articleMetadata;
 
   // Get only the date

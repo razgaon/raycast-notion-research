@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
-import { useReadwiseFetch } from "./reader/index";
-import { showToast, Toast, List } from "@raycast/api";
+import { addToReadwise } from "./reader/index";
+import { showToast, Toast, List, getPreferenceValues } from "@raycast/api";
 // import { setTimeout } from "timers/promises";
 import { ArxivClient, ArticleMetadata } from "arxivjs";
-import { createArticlePage, updateArticlePageReaderUrl } from "./notion/notion";
+import { createArticleNotionPage, updateArticlePageReaderUrl } from "./notion/createArticlePage";
+import { addReferencesToNotion } from "./notion/addReferencesToPage";
 import { useDebounce } from "use-debounce";
 import { ArticleItem } from "./components/articleItem";
 import { ReaderRequestBody, ReaderResponse } from "./reader/types";
-import { addReferencesToPage } from "./semanticScholar";
+import { fetchPapers, parsePapers } from "./semanticScholar/api";
+import { DataItem } from "./semanticScholar/types";
+import { Preferences } from "./config/index";
+
+const preferences = getPreferenceValues<Preferences>();
+
+const READWISE_API_KEY = preferences.readerApiKey;
 
 export default function Command() {
   const client = new ArxivClient();
@@ -15,19 +22,21 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [error, setError] = useState<Error>();
   const [debouncedText] = useDebounce(searchText, 1000, { leading: true });
-  const [articleMetadata, setArticleMetadata] = useState(null as ArticleMetadata | null);
+  const [articleMetadata, setArticleMetadata] = useState({} as ArticleMetadata);
   const [body, setBody] = useState({} as ReaderRequestBody);
   const [pageId, setPageId] = useState("");
-
-  const readerResponse: ReaderResponse = useReadwiseFetch(body);
 
   useEffect(() => {
     async function updateUrl() {
       try {
         if (body && body.url !== "" && pageId !== "") {
-          console.log("Updating page with URL: ", readerResponse.url);
           await updateArticlePageReaderUrl(pageId, body.url);
-          // await addReferencesToPage(body);
+          if (READWISE_API_KEY && Object.keys(body).length > 0) {
+            await addToReadwise(body);
+          }
+
+          const referencesResponse: DataItem[] = await fetchPapers(body.url);
+          await addReferencesToNotion(pageId, parsePapers(referencesResponse));
         }
       } catch (e: any) {
         setError(e);
@@ -63,8 +72,8 @@ export default function Command() {
   const onPush = async () => {
     if (!articleMetadata) return;
 
-    const res = await createArticlePage(articleMetadata);
-    setPageId(res.id);
+    const notionResponse = await createArticleNotionPage(articleMetadata);
+    setPageId(notionResponse.id);
 
     const readerRequestbody: ReaderRequestBody = {
       category: "pdf",

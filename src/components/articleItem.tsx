@@ -1,6 +1,7 @@
 import { ActionPanel, Detail, List, Icon, Color, Action } from "@raycast/api";
+import { ArticleMetadata } from "arxivjs";
 
-export function ArticleItem({ articleMetadata, onPush }) {
+export function ArticleItem({ articleMetadata, onPush }: { articleMetadata: ArticleMetadata; onPush: () => void }) {
   return (
     <List.Item
       icon="list-icon.png"
