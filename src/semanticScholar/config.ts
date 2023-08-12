@@ -1,5 +1,5 @@
 export const LIMIT = 100;
-export const FETCH_LIMIT = 20;
+export const FETCH_LIMIT = 40;
 export const FIELDS = [
   "contexts",
   "intents",

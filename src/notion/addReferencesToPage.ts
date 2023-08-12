@@ -23,7 +23,7 @@ export async function addReferencesToNotion(pageId: string, references: CitedPap
         },
       },
       ...references.map(({ title, url, citationCount, openAccessPdf }) => ({
-        bulleted_list_item: {
+        numbered_list_item: {
           rich_text: [
             {
               text: {

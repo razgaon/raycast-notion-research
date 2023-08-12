@@ -1,4 +1,3 @@
-import { useFetch as useRayFetch } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../config/index";
 import { ReaderRequestBody, ReaderResponse } from "./types";

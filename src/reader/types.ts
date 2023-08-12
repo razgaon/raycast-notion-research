@@ -1,5 +1,5 @@
 export type ReaderRequestBody = {
-  category: string;
+  category?: string;
   url: string;
   tags: string[];
   title: string;

@@ -1,20 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { addToReadwise } from "./reader/index";
 import { showToast, Toast, List, getPreferenceValues } from "@raycast/api";
-// import { setTimeout } from "timers/promises";
 import { ArxivClient, ArticleMetadata } from "arxivjs";
 import { createArticleNotionPage, updateArticlePageReaderUrl } from "./notion/createArticlePage";
 import { addReferencesToNotion } from "./notion/addReferencesToPage";
 import { useDebounce } from "use-debounce";
 import { ArticleItem } from "./components/articleItem";
-import { ReaderRequestBody, ReaderResponse } from "./reader/types";
+import { ReaderRequestBody } from "./reader/types";
 import { fetchPapers, parsePapers } from "./semanticScholar/api";
 import { DataItem } from "./semanticScholar/types";
 import { Preferences } from "./config/index";
+import { filterArxivUrls } from "./utils/urlExtractor";
 
 const preferences = getPreferenceValues<Preferences>();
-
 const READWISE_API_KEY = preferences.readerApiKey;
+
+function createReaderRequestBody(article: ArticleMetadata): ReaderRequestBody {
+  const readerRequestbody: ReaderRequestBody = {
+    title: article.title,
+    category: "pdf",
+    url: article.pdf.replace(/^http:/, "https:"),
+    tags: [...article.categoryNames],
+    summary: article.summary,
+    author: article.authors[0],
+    published_at: article.date,
+  };
+
+  if (article.journal !== "None") {
+    readerRequestbody.tags.push(article.journal);
+  }
+
+  return readerRequestbody;
+}
 
 export default function Command() {
   const client = new ArxivClient();
@@ -22,42 +39,44 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [error, setError] = useState<Error>();
   const [debouncedText] = useDebounce(searchText, 1000, { leading: true });
-  const [articleMetadata, setArticleMetadata] = useState({} as ArticleMetadata);
-  const [body, setBody] = useState({} as ReaderRequestBody);
-  const [pageId, setPageId] = useState("");
+  const [articlesMetadata, setArticlesMetadata] = useState<ArticleMetadata[]>([]);
+  const [readerRequestBodies, setReaderRequestBodies] = useState<ReaderRequestBody[]>([]);
+  const [notionPageIds, setNotionPageIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    async function updateUrl() {
-      try {
-        if (body && body.url !== "" && pageId !== "") {
-          await updateArticlePageReaderUrl(pageId, body.url);
-          if (READWISE_API_KEY && Object.keys(body).length > 0) {
-            await addToReadwise(body);
-          }
-
-          const referencesResponse: DataItem[] = await fetchPapers(body.url);
-          await addReferencesToNotion(pageId, parsePapers(referencesResponse));
+  const updateUrl = useCallback(async (body: ReaderRequestBody, pageId: string) => {
+    try {
+      if (body && body.url !== "" && pageId !== "") {
+        if (READWISE_API_KEY && Object.keys(body).length > 0) {
+          const readwiseUrl = await addToReadwise(body);
+          await updateArticlePageReaderUrl(pageId, readwiseUrl.url);
         }
-      } catch (e: any) {
-        setError(e);
-      }
-    }
 
-    updateUrl();
-  }, [body]);
+        const referencesResponse: DataItem[] = await fetchPapers(body.url);
+        await addReferencesToNotion(pageId, parsePapers(referencesResponse));
+      }
+    } catch (e: any) {
+      setError(e);
+    }
+  }, []);
 
   useEffect(() => {
-    async function getArticle() {
-      try {
-        const articleMetadata: ArticleMetadata = await client.getArticle(debouncedText);
-        setArticleMetadata(articleMetadata);
-      } catch (e: any) {
-        setError(e);
-      }
-    }
+    Promise.all(readerRequestBodies.map((body, index) => updateUrl(body, notionPageIds[index])));
+  }, [readerRequestBodies, notionPageIds, updateUrl]);
 
-    getArticle();
-  }, [debouncedText]);
+  const getArticles = useCallback(async (urls: string[]) => {
+    try {
+      const articleMetadatas = await Promise.all(urls.map((url) => client.getArticle(url)));
+      setArticlesMetadata(articleMetadatas);
+    } catch (e: any) {
+      setError(e);
+    }
+  }, []);
+
+  useEffect(() => {
+    const articleUrls = filterArxivUrls(debouncedText);
+    console.log(articleUrls);
+    getArticles(articleUrls);
+  }, [debouncedText, getArticles]);
 
   useEffect(() => {
     if (error) {
@@ -69,38 +88,24 @@ export default function Command() {
     }
   }, [error]);
 
-  const onPush = async () => {
-    if (!articleMetadata) return;
+  const handleArticlePush = async () => {
+    const readerRequestBodies = articlesMetadata.map((article) => createReaderRequestBody(article));
+    const pageIds = await Promise.all(articlesMetadata.map((article) => createArticleNotionPage(article)));
 
-    const notionResponse = await createArticleNotionPage(articleMetadata);
-    setPageId(notionResponse.id);
-
-    const readerRequestbody: ReaderRequestBody = {
-      category: "pdf",
-      url: articleMetadata.pdf.replace(/^http:/, "https:"), // Replace only the "http:" part of the URL with "https:"
-      tags: [...articleMetadata.categoryNames],
-      title: articleMetadata.title,
-      summary: articleMetadata.summary,
-      author: articleMetadata.authors[0],
-      published_at: articleMetadata.date,
-    };
-
-    // Add the journal to tags if it is not "None"
-    if (articleMetadata.journal !== "None") {
-      readerRequestbody.tags.push(articleMetadata.journal);
-    }
-
-    setBody(readerRequestbody);
+    setReaderRequestBodies(readerRequestBodies);
+    setNotionPageIds(pageIds);
   };
 
   return (
     <List
-      navigationTitle="Search Tasks"
-      searchBarPlaceholder="Search your task"
+      navigationTitle="Search Papers"
+      searchBarPlaceholder="Search your paper"
       onSearchTextChange={setSearchText}
       throttle={true}
     >
-      <ArticleItem articleMetadata={articleMetadata} onPush={onPush} />
+      {articlesMetadata.map((article, index) => (
+        <ArticleItem key={index} articleMetadata={article} onPush={handleArticlePush} />
+      ))}
     </List>
   );
 }
