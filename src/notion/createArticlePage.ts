@@ -58,6 +58,7 @@ export async function createArticleNotionPage(articleMetadata: ArticleMetadata):
         type: "heading_2",
         heading_2: {
           rich_text: [{ type: "text", text: { content: "Abstract" } }],
+          color: "yellow",
         },
       },
       {
