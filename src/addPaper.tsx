@@ -11,6 +11,8 @@ import { fetchPapers, parsePapers } from "./semanticScholar/api";
 import { DataItem } from "./semanticScholar/types";
 import { Preferences } from "./config/index";
 import { filterArxivUrls } from "./utils/urlExtractor";
+import { getPaperExplanation } from "./llm/explanations";
+import { addExplanationsToNotion } from "./notion/addExplanationToPage";
 
 const preferences = getPreferenceValues<Preferences>();
 const READWISE_API_KEY = preferences.readerApiKey;
@@ -52,6 +54,7 @@ export default function Command() {
         }
 
         const referencesResponse: DataItem[] = await fetchPapers(body.url);
+        await addExplanationsToNotion(pageId, await getPaperExplanation(body.summary));
         await addReferencesToNotion(pageId, parsePapers(referencesResponse));
       }
     } catch (e: any) {

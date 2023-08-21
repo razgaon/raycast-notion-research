@@ -34,7 +34,8 @@ export async function fetchPapers(paperUrl: string): Promise<DataItem[]> {
 
 export function parsePapers(papersContent: DataItem[]) {
   return papersContent
-    .sort((a, b) => b.citedPaper.citationCount - a.citedPaper.citationCount)
+    .map((paper) => paper.citedPaper)
+    .sort((a, b) => b.citationCount - a.citationCount)
     .slice(0, LIMIT)
-    .map((paper) => paper.citedPaper);
+    .filter((paper) => paper.url !== null);
 }

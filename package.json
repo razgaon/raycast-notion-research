@@ -36,6 +36,14 @@
           "description": "Readwise Reader Api Token",
           "type": "textfield",
           "required": false
+        },
+        {
+          "name": "openaiApiKey",
+          "title": "OpenAI Key",
+          "placeholder": "Your OpenAI API Key...",
+          "description": "Used to generate helpful explanations to understand the paper",
+          "type": "textfield",
+          "required": false
         }
       ]
     }
@@ -47,6 +55,7 @@
     "arxivjs": "^0.0.11",
     "got": "^11.8.2",
     "notion-types": "^6.16.0",
+    "openai": "^4.0.1",
     "use-debounce": "^9.0.4"
   },
   "devDependencies": {

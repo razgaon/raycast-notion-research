@@ -1,13 +1,13 @@
 import { Client } from "@notionhq/client";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../config/index";
-import { CitedPaper } from "../semanticScholar/types";
+import { Explanation } from "../llm/types";
 
 const preferences = getPreferenceValues<Preferences>();
 
 const notion = new Client({ auth: preferences.notionApiKey });
 
-export async function addReferencesToNotion(pageId: string, references: CitedPaper[]) {
+export async function addExplanationsToNotion(pageId: string, explanations: Explanation[]) {
   const response = await notion.blocks.children.append({
     block_id: pageId,
     children: [
@@ -16,20 +16,27 @@ export async function addReferencesToNotion(pageId: string, references: CitedPap
           rich_text: [
             {
               text: {
-                content: "References",
+                content: "Explanations",
               },
             },
           ],
-          color: "green",
+          color: "blue",
         },
       },
-      ...references.map(({ title, url, citationCount, openAccessPdf }) => ({
-        numbered_list_item: {
+      ...explanations.map(({ title, explanation }) => ({
+        paragraph: {
           rich_text: [
             {
               text: {
-                content: `${title} [${citationCount}]`,
-                link: { url: openAccessPdf?.url ?? url },
+                content: `${title}: `,
+              },
+              annotations: {
+                bold: true,
+              },
+            },
+            {
+              text: {
+                content: explanation,
               },
             },
           ],
