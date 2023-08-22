@@ -1,16 +1,11 @@
-import { getPreferenceValues } from "@raycast/api";
 import OpenAI from "openai";
-import { Preferences } from "../config/index";
 import { Explanation } from "./types";
 
-const preferences = getPreferenceValues<Preferences>();
-const OPENAI_API_KEY = preferences.openaiApiKey;
+export async function getPaperExplanation(openai_key: string, abstract: string): Promise<Explanation[]> {
+  const openai = new OpenAI({
+    apiKey: openai_key,
+  });
 
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
-
-export async function getPaperExplanation(abstract: string): Promise<Explanation[]> {
   const EXPLANATION_PROMPT = `You are an expert machine learning engineer and a brilliant teacher. Given an abstract of a paper, provide a list of confusing terminology introduced in the abstract and provide a brief explanation for each. Make your explanations clear so a novice machine learning researcher can understand.
     Your output should be a list object in the following format: 
     [{"title": "Data attribution", "explanation": "This is the process of determining which parts of the training data contributed to a specific prediction made by a model. In simpler terms, it's like asking, "which data points influenced this particular prediction?"}]

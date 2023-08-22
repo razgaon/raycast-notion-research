@@ -13,9 +13,11 @@ import { Preferences } from "./config/index";
 import { filterArxivUrls } from "./utils/urlExtractor";
 import { getPaperExplanation } from "./llm/explanations";
 import { addExplanationsToNotion } from "./notion/addExplanationToPage";
+import { Explanation } from "./llm/types";
 
 const preferences = getPreferenceValues<Preferences>();
 const READWISE_API_KEY = preferences.readerApiKey;
+const OPENAI_API_KEY = preferences.openaiApiKey;
 
 function createReaderRequestBody(article: ArticleMetadata): ReaderRequestBody {
   const readerRequestbody: ReaderRequestBody = {
@@ -44,27 +46,45 @@ export default function Command() {
   const [articlesMetadata, setArticlesMetadata] = useState<ArticleMetadata[]>([]);
   const [readerRequestBodies, setReaderRequestBodies] = useState<ReaderRequestBody[]>([]);
   const [notionPageIds, setNotionPageIds] = useState<string[]>([]);
+  const updateReadwise = async (body: ReaderRequestBody) => {
+    if (!READWISE_API_KEY || Object.keys(body).length === 0) return;
 
-  const updateUrl = useCallback(async (body: ReaderRequestBody, pageId: string) => {
+    const readwiseUrl = await addToReadwise(body);
+    return readwiseUrl.url;
+  };
+
+  const fetchExplanationsAndPapers = async (body: ReaderRequestBody): Promise<[DataItem[], Explanation[]]> => {
+    if (!OPENAI_API_KEY || body.summary === "") {
+      return [await fetchPapers(body.url), []];
+    }
+
+    return Promise.all([fetchPapers(body.url), getPaperExplanation(OPENAI_API_KEY, body.summary)]);
+  };
+
+  const updatePageData = useCallback(async (body: ReaderRequestBody, pageId: string) => {
     try {
-      if (body && body.url !== "" && pageId !== "") {
-        if (READWISE_API_KEY && Object.keys(body).length > 0) {
-          const readwiseUrl = await addToReadwise(body);
-          await updateArticlePageReaderUrl(pageId, readwiseUrl.url);
-        }
+      if (!body || body.url === "" || pageId === "") return;
 
-        const referencesResponse: DataItem[] = await fetchPapers(body.url);
-        await addExplanationsToNotion(pageId, await getPaperExplanation(body.summary));
-        await addReferencesToNotion(pageId, parsePapers(referencesResponse));
+      const readwiseUrl = await updateReadwise(body);
+      if (readwiseUrl) {
+        await updateArticlePageReaderUrl(pageId, readwiseUrl);
       }
+
+      const [referencesResponse, explanations] = await fetchExplanationsAndPapers(body);
+
+      if (explanations.length > 0) {
+        await addExplanationsToNotion(pageId, explanations);
+      }
+
+      await addReferencesToNotion(pageId, parsePapers(referencesResponse));
     } catch (e: any) {
       setError(e);
     }
   }, []);
 
   useEffect(() => {
-    Promise.all(readerRequestBodies.map((body, index) => updateUrl(body, notionPageIds[index])));
-  }, [readerRequestBodies, notionPageIds, updateUrl]);
+    Promise.all(readerRequestBodies.map((body, index) => updatePageData(body, notionPageIds[index])));
+  }, [readerRequestBodies, notionPageIds, updatePageData]);
 
   const getArticles = useCallback(async (urls: string[]) => {
     try {
@@ -77,7 +97,6 @@ export default function Command() {
 
   useEffect(() => {
     const articleUrls = filterArxivUrls(debouncedText);
-    console.log(articleUrls);
     getArticles(articleUrls);
   }, [debouncedText, getArticles]);
 
