@@ -4,14 +4,13 @@ import { ArticleMetadata } from "arxivjs";
 import { Status } from "./config";
 import { Preferences } from "../config/index";
 import { splitTextAndEquations } from "./utils";
-import { CreatePageResponse } from "@notionhq/client/build/src/api-endpoints";
 
 const preferences = getPreferenceValues<Preferences>();
 
 const notion = new Client({ auth: preferences.notionApiKey });
 
-export async function createArticleNotionPage(articleMetadata: ArticleMetadata): string {
-  const { authors, categoryNames, id, journal, pdf, summary, title } = articleMetadata;
+export async function createArticleNotionPage(articleMetadata: ArticleMetadata): Promise<string> {
+  const { authors, categoryNames, pdf, summary, title } = articleMetadata;
 
   // Get only the date
   const date = new Date(articleMetadata.date).toISOString().split("T")[0];
@@ -100,4 +99,18 @@ export async function updateArticlePageReaderUrl(pageId: string, readerUrl: stri
       },
     },
   });
+}
+
+export async function findArticlePage(url: string) {
+  const res = await notion.databases.query({
+    database_id: preferences.databaseKey,
+    filter: {
+      property: "URL",
+      url: {
+        equals: url,
+      },
+    },
+  });
+
+  return res.results.length > 0;
 }
