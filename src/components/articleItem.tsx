@@ -4,7 +4,7 @@ import { ArticleMetadata } from "arxivjs";
 export function ArticleItem({ articleMetadata, onPush }: { articleMetadata: ArticleMetadata; onPush: () => void }) {
   return (
     <List.Item
-      icon="list-icon.png"
+      icon="list_icon.png"
       title={articleMetadata?.title ?? "No papers yet..."}
       actions={
         <ActionPanel>

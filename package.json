@@ -3,12 +3,13 @@
   "name": "notion_researcher",
   "title": "Notion Researcher",
   "description": "An extension to supercharge your research workflow with Notion",
-  "icon": "command-icon.png",
+  "icon": "command_icon.png",
   "author": "raz_gaon",
   "license": "MIT",
   "commands": [
     {
       "name": "addPaper",
+      "icon": "command_icon.png",      
       "title": "Add Research Papers",
       "description": "Add a research paper from Arxiv to a Notion database with metadata, references, and explanations.",
       "mode": "view",
