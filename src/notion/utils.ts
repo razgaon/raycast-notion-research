@@ -1,7 +1,7 @@
-import {} from "@notionhq/client";
+type SplitResult = { type: "text"; text: { content: string } } | { type: "equation"; equation: { expression: string } };
 
-export function splitTextAndEquations(inputString: string): any[] {
-  return inputString.split(/(\$[^\$]*\$)/g).reduce((acc: any[], value: string, index: number) => {
+export function splitTextAndEquations(inputString: string): SplitResult[] {
+  return inputString.split(/($[^$]*$)/g).reduce((acc: SplitResult[], value: string, index: number) => {
     if (value !== "") {
       if (index % 2 === 0) {
         acc.push({ type: "text", text: { content: value } });
@@ -12,5 +12,3 @@ export function splitTextAndEquations(inputString: string): any[] {
     return acc;
   }, []);
 }
-
-("https://api.semanticscholar.org/graph/v1/paper/649def34f8be52c8b66281af98ae884c09aef38b/references?fields=contexts,intents,openAccessPdf,citationCount,abstract,url,publicationDate,authors,journal,title,isInfluential,abstract&offset=200&limit=10");

@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "addPaper",
-      "title": "Add a research paper",
-      "description": "Add a research paper from Arxiv to a Notion database with all the metadata included.",
+      "title": "Add Research Papers",
+      "description": "Add a research paper from Arxiv to a Notion database with metadata, references, and explanations.",
       "mode": "view",
       "preferences": [
         {
@@ -49,9 +49,9 @@
     }
   ],
   "dependencies": {
-    "@notionhq/client": "^2.2.9",
-    "@raycast/api": "^1.56.0",
-    "@raycast/utils": "^1.9.0",
+    "@notionhq/client": "^2.2.11",
+    "@raycast/api": "^1.57.1",
+    "@raycast/utils": "^1.9.1",
     "arxivjs": "^0.0.11",
     "got": "^11.8.2",
     "notion-types": "^6.16.0",

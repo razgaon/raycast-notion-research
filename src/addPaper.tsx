@@ -75,8 +75,8 @@ export default function Command() {
       }
 
       await addReferencesToNotion(pageId, parsePapers(referencesResponse));
-    } catch (e: any) {
-      setError(e);
+    } catch (e) {
+      setError(new Error("Failed to add references and explanations to Notion"));
     }
   }, []);
 
@@ -103,8 +103,8 @@ export default function Command() {
     try {
       const articleMetadatas = await Promise.all(urls.map((url) => client.getArticle(url)));
       setArticlesMetadata(articleMetadatas);
-    } catch (e: any) {
-      setError(e);
+    } catch (e) {
+      setError(new Error("Failed to fetch article metadata"));
     }
   }, []);
 
@@ -153,8 +153,8 @@ export default function Command() {
 
       setReaderRequestBodies(readerRequestBodies);
       setNotionPageIds(pageIds);
-    } catch (e: any) {
-      setError(e);
+    } catch (e) {
+      setError(new Error("Failed to add articles to Notion"));
     }
   };
 

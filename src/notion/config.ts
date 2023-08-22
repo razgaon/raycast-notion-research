@@ -1,5 +1,5 @@
 export enum Status {
-    NotRead = "Not read",
-    InProgress = "In progress",
-    Read = "Read",
+  NotRead = "Not read",
+  InProgress = "In progress",
+  Read = "Read",
 }
