@@ -6,6 +6,7 @@
   "icon": "command_icon.png",
   "author": "raz_gaon",
   "license": "MIT",
+  "categories": ["Productivity"],
   "commands": [
     {
       "name": "addPaper",
