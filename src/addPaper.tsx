@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { addToReadwise } from "./reader/index";
 import { showToast, Toast, List, getPreferenceValues } from "@raycast/api";
 import { ArxivClient, ArticleMetadata } from "arxivjs";
-import { createArticleNotionPage, updateArticlePageReaderUrl } from "./notion/createArticlePage";
+import { createArticleNotionPage, findArticlePage, updateArticlePageReaderUrl } from "./notion/createArticlePage";
 import { addReferencesToNotion } from "./notion/addReferencesToPage";
 import { useDebounce } from "use-debounce";
 import { ArticleItem } from "./components/articleItem";
@@ -111,11 +111,34 @@ export default function Command() {
   }, [error]);
 
   const handleArticlePush = async () => {
-    const readerRequestBodies = articlesMetadata.map((article) => createReaderRequestBody(article));
-    const pageIds = await Promise.all(articlesMetadata.map((article) => createArticleNotionPage(article)));
+    try {
+      // Get articles that don't exist in Notion
+      const articlesToAdd = await Promise.all(
+        articlesMetadata.map(async (articleMetadata) => {
+          const exists = await findArticlePage(articleMetadata.pdf);
+          return exists ? null : articleMetadata;
+        })
+      );
 
-    setReaderRequestBodies(readerRequestBodies);
-    setNotionPageIds(pageIds);
+      // Filter out articles that exist in Notion
+      const newArticles = articlesToAdd.filter(Boolean) as ArticleMetadata[];
+
+      const existing = articlesToAdd.length - newArticles.length;
+      if (existing > 0) {
+        showToast({
+          style: Toast.Style.Success,
+          title: `${existing} articles already exist in your Database`,
+        });
+      }
+
+      const readerRequestBodies = newArticles.map((article) => createReaderRequestBody(article));
+      const pageIds = await Promise.all(newArticles.map((article) => createArticleNotionPage(article)));
+
+      setReaderRequestBodies(readerRequestBodies);
+      setNotionPageIds(pageIds);
+    } catch (e: any) {
+      setError(e);
+    }
   };
 
   return (
