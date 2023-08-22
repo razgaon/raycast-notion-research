@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { addToReadwise } from "./reader/index";
-import { showToast, Toast, List, getPreferenceValues, closeMainWindow } from "@raycast/api";
+import { showToast, Toast, List, getPreferenceValues, closeMainWindow, PopToRootType } from "@raycast/api";
 import { ArxivClient, ArticleMetadata } from "arxivjs";
 import { createArticleNotionPage, findArticlePage, updateArticlePageReaderUrl } from "./notion/createArticlePage";
 import { addReferencesToNotion } from "./notion/addReferencesToPage";
@@ -81,7 +81,22 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    Promise.all(readerRequestBodies.map((body, index) => updatePageData(body, notionPageIds[index])));
+    async function updateAllPages() {
+      if (readerRequestBodies.length === 0 || notionPageIds.length === 0) return;
+
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Generating explanations and references for ${articlesMetadata.length} articles...`,
+      });
+
+      await Promise.all(readerRequestBodies.map((body, index) => updatePageData(body, notionPageIds[index])));
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `${readerRequestBodies.length} articles added!`,
+      });
+    }
+    updateAllPages();
   }, [readerRequestBodies, notionPageIds, updatePageData]);
 
   const getArticles = useCallback(async (urls: string[]) => {
@@ -110,9 +125,9 @@ export default function Command() {
 
   const handleArticlePush = async () => {
     try {
-      await closeMainWindow();
+      await closeMainWindow({ clearRootSearch: false, popToRootType: PopToRootType.Suspended });
 
-      showToast({
+      await showToast({
         style: Toast.Style.Animated,
         title: `${articlesMetadata.length} articles sent to Notion...`,
       });
@@ -138,11 +153,6 @@ export default function Command() {
 
       setReaderRequestBodies(readerRequestBodies);
       setNotionPageIds(pageIds);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: `${newArticles.length} articles added!`,
-      });
     } catch (e: any) {
       setError(e);
     }
