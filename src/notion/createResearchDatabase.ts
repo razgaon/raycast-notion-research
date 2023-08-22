@@ -7,9 +7,9 @@ const preferences = getPreferenceValues<Preferences>();
 
 const notion = new Client({ auth: preferences.notionApiKey });
 
-export async function createResearchDatabase() {
+export async function createResearchDatabase(parentKey: string) {
   const response = await notion.databases.create({
-    parent: { database_id: preferences.databaseKey },
+    parent: { page_id: parentKey },
     title: [
       {
         text: {
