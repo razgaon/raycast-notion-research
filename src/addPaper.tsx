@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { addToReadwise } from "./reader/index";
-import { showToast, Toast, List, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, List, getPreferenceValues, closeMainWindow } from "@raycast/api";
 import { ArxivClient, ArticleMetadata } from "arxivjs";
 import { createArticleNotionPage, findArticlePage, updateArticlePageReaderUrl } from "./notion/createArticlePage";
 import { addReferencesToNotion } from "./notion/addReferencesToPage";
@@ -46,11 +46,12 @@ export default function Command() {
   const [articlesMetadata, setArticlesMetadata] = useState<ArticleMetadata[]>([]);
   const [readerRequestBodies, setReaderRequestBodies] = useState<ReaderRequestBody[]>([]);
   const [notionPageIds, setNotionPageIds] = useState<string[]>([]);
-  const updateReadwise = async (body: ReaderRequestBody) => {
+
+  const updateReadwise = async (body: ReaderRequestBody, pageId: string) => {
     if (!READWISE_API_KEY || Object.keys(body).length === 0) return;
 
     const readwiseUrl = await addToReadwise(body);
-    return readwiseUrl.url;
+    await updateArticlePageReaderUrl(pageId, readwiseUrl.url);
   };
 
   const fetchExplanationsAndPapers = async (body: ReaderRequestBody): Promise<[DataItem[], Explanation[]]> => {
@@ -65,10 +66,7 @@ export default function Command() {
     try {
       if (!body || body.url === "" || pageId === "") return;
 
-      const readwiseUrl = await updateReadwise(body);
-      if (readwiseUrl) {
-        await updateArticlePageReaderUrl(pageId, readwiseUrl);
-      }
+      await updateReadwise(body, pageId);
 
       const [referencesResponse, explanations] = await fetchExplanationsAndPapers(body);
 
@@ -112,6 +110,13 @@ export default function Command() {
 
   const handleArticlePush = async () => {
     try {
+      await closeMainWindow();
+
+      showToast({
+        style: Toast.Style.Animated,
+        title: `${articlesMetadata.length} articles sent to Notion...`,
+      });
+
       // Get articles that don't exist in Notion
       const articlesToAdd = await Promise.all(
         articlesMetadata.map(async (articleMetadata) => {
@@ -123,19 +128,21 @@ export default function Command() {
       // Filter out articles that exist in Notion
       const newArticles = articlesToAdd.filter(Boolean) as ArticleMetadata[];
 
-      const existing = articlesToAdd.length - newArticles.length;
-      if (existing > 0) {
-        showToast({
-          style: Toast.Style.Success,
-          title: `${existing} articles already exist in your Database`,
-        });
-      }
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `${newArticles.length} / ${articlesMetadata.length} articles being added...`,
+      });
 
       const readerRequestBodies = newArticles.map((article) => createReaderRequestBody(article));
       const pageIds = await Promise.all(newArticles.map((article) => createArticleNotionPage(article)));
 
       setReaderRequestBodies(readerRequestBodies);
       setNotionPageIds(pageIds);
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `${newArticles.length} articles added!`,
+      });
     } catch (e: any) {
       setError(e);
     }
