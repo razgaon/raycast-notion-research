@@ -5,8 +5,6 @@ If given an OpenAI key, the extension will generate explanations to jargon and c
 Additionally, references from the paper are added and sorted by number of citations.
 All authors are added to enable full-text search on authors inside your Notion database.
 
-https://github.com/razgaon/raycast-notion-research/assets/43913869/183afc8a-5025-4f45-a903-3e69b62c87ea
-
 ## Setup
 ### Create a Notion internal integration:
 Initially, you will need to create an internal notion integration and use the resulting Notion api key (Public OAuth support will be added soon.)
