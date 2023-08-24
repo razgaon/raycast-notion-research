@@ -1,4 +1,13 @@
-import { ActionPanel, Detail, List, Action, useNavigation, openCommandPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  Detail,
+  List,
+  Action,
+  useNavigation,
+  openCommandPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { ParsedPage } from "../notion/types";
 import { createResearchDatabase } from "../notion/createResearchDatabase";
 
@@ -7,7 +16,17 @@ export function PageListItem({ page }: { page: ParsedPage }) {
 
   async function onPush() {
     const id = page.id;
+    await showToast({
+      style: Toast.Style.Animated,
+      title: `Database creation in progress...`,
+    });
     const createdDatabase = await createResearchDatabase(id);
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Database created!`,
+    });
+
     push(
       <Detail
         actions={
