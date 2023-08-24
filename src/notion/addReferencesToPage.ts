@@ -35,9 +35,9 @@ export async function addReferencesToNotion(pageId: string, references: CitedPap
             {
               text: {
                 content: ` [${citationCount}]`,
-                annotations: {
-                  bold: true,
-                },
+              },
+              annotations: {
+                bold: true,
               },
             },
           ],
