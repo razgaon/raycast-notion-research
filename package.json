@@ -3,24 +3,44 @@
   "name": "notion_researcher",
   "title": "Notion Researcher",
   "description": "An extension to supercharge your research workflow with Notion",
-  "icon": "command-icon.png",
+  "icon": "command_icon.png",
   "author": "raz_gaon",
   "license": "MIT",
+  "categories": ["Productivity", "Applications"],
+  "preferences": [
+    {
+      "name": "notionApiKey",
+      "title": "Notion Token",
+      "placeholder": "Your Notion api token...",
+      "description": "Notion token to allow access to the database",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "readerApiKey",
+      "title": "Readwise Reader Key",
+      "placeholder": "Your Readwise Reader Key...",
+      "description": "Readwise Reader Api Token",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI Key",
+      "placeholder": "Your OpenAI API Key...",
+      "description": "Used to generate helpful explanations to understand the paper",
+      "type": "textfield",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "addPaper",
-      "title": "Add a research paper",
-      "description": "Add a research paper from Arxiv to a Notion database with all the metadata included.",
+      "icon": "command_icon.png",      
+      "title": "Add Research Papers",
+      "description": "Add a research paper from Arxiv to a Notion database with metadata, references, and explanations.",
       "mode": "view",
       "preferences": [
-        {
-          "name": "notionApiKey",
-          "title": "Notion Token",
-          "placeholder": "Your Notion api token...",
-          "description": "Notion token to allow access to the database",
-          "type": "password",
-          "required": true
-        },
         {
           "name": "databaseKey",
           "title": "Notion Database Key",
@@ -28,30 +48,21 @@
           "description": "Notion database identifier",
           "type": "textfield",
           "required": true
-        },
-        {
-          "name": "readerApiKey",
-          "title": "Readwise Reader Key",
-          "placeholder": "Your Readwise Reader Key...",
-          "description": "Readwise Reader Api Token",
-          "type": "textfield",
-          "required": false
-        },
-        {
-          "name": "openaiApiKey",
-          "title": "OpenAI Key",
-          "placeholder": "Your OpenAI API Key...",
-          "description": "Used to generate helpful explanations to understand the paper",
-          "type": "textfield",
-          "required": false
-        }
+        }        
       ]
+    },
+    {
+      "name": "createDatabase",
+      "icon": "command_icon.png",      
+      "title": "Create Research Database",
+      "description": "Create the database to hold the research papers.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@notionhq/client": "^2.2.9",
-    "@raycast/api": "^1.56.0",
-    "@raycast/utils": "^1.9.0",
+    "@notionhq/client": "^2.2.11",
+    "@raycast/api": "^1.57.1",
+    "@raycast/utils": "^1.9.1",
     "arxivjs": "^0.0.11",
     "got": "^11.8.2",
     "notion-types": "^6.16.0",

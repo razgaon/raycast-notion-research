@@ -1,7 +1,7 @@
 import { Client } from "@notionhq/client";
 import { getPreferenceValues } from "@raycast/api";
 import { ArticleMetadata } from "arxivjs";
-import { Status } from "./config";
+import { Status } from "./types";
 import { Preferences } from "../config/index";
 import { splitTextAndEquations } from "./utils";
 
@@ -40,7 +40,7 @@ export async function createArticleNotionPage(articleMetadata: ArticleMetadata):
         multi_select: [...authors.map((x) => ({ name: x }))],
       },
       Status: {
-        status: {
+        select: {
           name: Status.NotRead,
         },
       },
@@ -57,7 +57,7 @@ export async function createArticleNotionPage(articleMetadata: ArticleMetadata):
         type: "heading_2",
         heading_2: {
           rich_text: [{ type: "text", text: { content: "Abstract" } }],
-          color: "yellow",
+          color: "purple",
         },
       },
       {

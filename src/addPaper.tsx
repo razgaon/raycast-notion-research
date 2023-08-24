@@ -75,14 +75,20 @@ export default function Command() {
       }
 
       await addReferencesToNotion(pageId, parsePapers(referencesResponse));
-    } catch (e: any) {
-      setError(e);
+    } catch (e) {
+      setError(new Error("Failed to add references and explanations to Notion"));
     }
   }, []);
 
   useEffect(() => {
     async function updateAllPages() {
-      if (readerRequestBodies.length === 0 || notionPageIds.length === 0) return;
+      if (readerRequestBodies.length === 0 || notionPageIds.length === 0) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: `No new articles added`,
+        });
+        return;
+      }
 
       await showToast({
         style: Toast.Style.Animated,
@@ -103,8 +109,8 @@ export default function Command() {
     try {
       const articleMetadatas = await Promise.all(urls.map((url) => client.getArticle(url)));
       setArticlesMetadata(articleMetadatas);
-    } catch (e: any) {
-      setError(e);
+    } catch (e) {
+      setError(new Error("Failed to fetch article metadata"));
     }
   }, []);
 
@@ -153,8 +159,8 @@ export default function Command() {
 
       setReaderRequestBodies(readerRequestBodies);
       setNotionPageIds(pageIds);
-    } catch (e: any) {
-      setError(e);
+    } catch (e) {
+      setError(new Error("Failed to add articles to Notion"));
     }
   };
 
@@ -166,7 +172,7 @@ export default function Command() {
       throttle={true}
     >
       {articlesMetadata.map((article, index) => (
-        <ArticleItem key={index} articleMetadata={article} onPush={handleArticlePush} />
+        <ArticleItem key={index} articleMetadata={article} onAction={handleArticlePush} />
       ))}
     </List>
   );
