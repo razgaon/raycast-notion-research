@@ -1,6 +1,6 @@
 import { Client } from "@notionhq/client";
 import { getPreferenceValues } from "@raycast/api";
-import { Status } from "./config";
+import { Status } from "./types";
 import { Preferences } from "../config/index";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -51,6 +51,10 @@ export async function createResearchDatabase(parentKey: string) {
       Date: {
         date: {},
         type: "date",
+      },
+      "Reader Url": {
+        type: "url",
+        url: {},
       },
     },
   });

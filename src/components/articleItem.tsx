@@ -1,14 +1,14 @@
-import { ActionPanel, Detail, List, Icon, Color, Action } from "@raycast/api";
+import { ActionPanel, List, Icon, Color, Action } from "@raycast/api";
 import { ArticleMetadata } from "arxivjs";
 
-export function ArticleItem({ articleMetadata, onPush }: { articleMetadata: ArticleMetadata; onPush: () => void }) {
+export function ArticleItem({ articleMetadata, onAction }: { articleMetadata: ArticleMetadata; onAction: () => void }) {
   return (
     <List.Item
       icon="list_icon.png"
       title={articleMetadata?.title ?? "No papers yet..."}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" onPush={onPush} target={<Detail markdown="Page created successfully!" />} />
+          <Action title="Add Paper" onAction={onAction} />
         </ActionPanel>
       }
       accessories={[

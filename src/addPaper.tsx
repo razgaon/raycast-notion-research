@@ -82,7 +82,13 @@ export default function Command() {
 
   useEffect(() => {
     async function updateAllPages() {
-      if (readerRequestBodies.length === 0 || notionPageIds.length === 0) return;
+      if (readerRequestBodies.length === 0 || notionPageIds.length === 0) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: `No new articles added`,
+        });
+        return;
+      }
 
       await showToast({
         style: Toast.Style.Animated,
@@ -166,7 +172,7 @@ export default function Command() {
       throttle={true}
     >
       {articlesMetadata.map((article, index) => (
-        <ArticleItem key={index} articleMetadata={article} onPush={handleArticlePush} />
+        <ArticleItem key={index} articleMetadata={article} onAction={handleArticlePush} />
       ))}
     </List>
   );

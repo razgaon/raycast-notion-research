@@ -6,7 +6,33 @@
   "icon": "command_icon.png",
   "author": "raz_gaon",
   "license": "MIT",
-  "categories": ["Productivity"],
+  "categories": ["Productivity", "Applications"],
+  "preferences": [
+    {
+      "name": "notionApiKey",
+      "title": "Notion Token",
+      "placeholder": "Your Notion api token...",
+      "description": "Notion token to allow access to the database",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "readerApiKey",
+      "title": "Readwise Reader Key",
+      "placeholder": "Your Readwise Reader Key...",
+      "description": "Readwise Reader Api Token",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI Key",
+      "placeholder": "Your OpenAI API Key...",
+      "description": "Used to generate helpful explanations to understand the paper",
+      "type": "textfield",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "addPaper",
@@ -16,38 +42,21 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "notionApiKey",
-          "title": "Notion Token",
-          "placeholder": "Your Notion api token...",
-          "description": "Notion token to allow access to the database",
-          "type": "password",
-          "required": true
-        },
-        {
           "name": "databaseKey",
           "title": "Notion Database Key",
           "placeholder": "Your Database Key...",
           "description": "Notion database identifier",
           "type": "textfield",
           "required": true
-        },
-        {
-          "name": "readerApiKey",
-          "title": "Readwise Reader Key",
-          "placeholder": "Your Readwise Reader Key...",
-          "description": "Readwise Reader Api Token",
-          "type": "textfield",
-          "required": false
-        },
-        {
-          "name": "openaiApiKey",
-          "title": "OpenAI Key",
-          "placeholder": "Your OpenAI API Key...",
-          "description": "Used to generate helpful explanations to understand the paper",
-          "type": "textfield",
-          "required": false
-        }
+        }        
       ]
+    },
+    {
+      "name": "createDatabase",
+      "icon": "command_icon.png",      
+      "title": "Create Research Database",
+      "description": "Create the database to hold the research papers.",
+      "mode": "view"
     }
   ],
   "dependencies": {
