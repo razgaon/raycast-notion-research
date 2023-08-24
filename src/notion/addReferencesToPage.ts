@@ -28,8 +28,16 @@ export async function addReferencesToNotion(pageId: string, references: CitedPap
           rich_text: [
             {
               text: {
-                content: `${title} [${citationCount}]`,
+                content: `${title}`,
                 link: { url: openAccessPdf?.url ?? url },
+              },
+            },
+            {
+              text: {
+                content: ` [${citationCount}]`,
+                annotations: {
+                  bold: true,
+                },
               },
             },
           ],

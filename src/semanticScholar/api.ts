@@ -1,11 +1,4 @@
-// import { useFetch as useRayFetch } from "@raycast/utils";
-import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../config/index";
 import got from "got";
-
-const preferences = getPreferenceValues<Preferences>();
-
-const SEMANTIC_SCHOLAR_KEY = preferences.semanticscholar_api_key;
 
 import { FETCH_LIMIT, FIELDS, LIMIT } from "./config";
 import { DataItem, SemanticScholarResponseType } from "./types";
@@ -21,7 +14,6 @@ export async function fetchPapers(paperUrl: string): Promise<DataItem[]> {
   const reqBody = {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Token ${SEMANTIC_SCHOLAR_KEY}`,
     },
   };
 
