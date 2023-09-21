@@ -80,18 +80,18 @@
     }
   ],
   "dependencies": {
-    "@notionhq/client": "^2.2.11",
-    "@raycast/api": "^1.57.1",
-    "@raycast/utils": "^1.9.1",
+    "@notionhq/client": "^2.2.13",
+    "@raycast/api": "^1.58.1",
+    "@raycast/utils": "^1.10.0",
     "@tryfabric/martian": "^1.2.4",
     "arxivjs": "^0.0.11",
     "got": "^11.8.2",
     "notion-types": "^6.16.0",
-    "openai": "^4.3.0",
+    "openai": "^4.8.0",
     "use-debounce": "^9.0.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "1.0.6",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "dotenv": "^16.3.1",
