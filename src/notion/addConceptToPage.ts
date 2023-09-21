@@ -26,14 +26,14 @@ function preprocessText(str: string): string {
 
 export async function createConceptNotionPage(title: string, markdown: string): Promise<string> {
   const notionObjects = markdownToBlocks(preprocessText(markdown));
-  
+
   const response = await notion.pages.create({
     parent: { database_id: preferences.conceptDatabaseKey },
     icon: {
       emoji: "📄",
     },
     properties: {
-      Name: {
+      Title: {
         title: [
           {
             text: {
@@ -49,13 +49,3 @@ export async function createConceptNotionPage(title: string, markdown: string): 
 
   return response.id;
 }
-
-/**
- * {
-        object: "block",
-        type: "equation",
-        equation: {
-          expression: `e=mc^2`,
-        },
-      }
- */

@@ -3,19 +3,30 @@ import {
   Clipboard,
   ActionPanel,
   Action,
-  Color,
-  Icon,
   showToast,
   Toast,
   closeMainWindow,
   PopToRootType,
+  Icon,
+  Color,
+  popToRoot,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { createConceptNotionPage } from "./notion/addConceptToPage";
+import { useCachedPromise } from "@raycast/utils";
+import { queryDatabase } from "./notion/queryDatabase";
+
+export function useQueryDatabase(query: string) {
+  const res = useCachedPromise((query) => queryDatabase(query), [query], {
+    keepPreviousData: true,
+  });
+  return res;
+}
 
 export default function Command() {
   const [titleText, setTitleText] = useState<string>("");
   const [clipboardText, setClipboardText] = useState<string | null>(null);
+  const { data: searchPages } = useQueryDatabase(titleText);
 
   useEffect(() => {
     async function readClipboard() {
@@ -30,6 +41,10 @@ export default function Command() {
     if (clipboardText && titleText !== "") {
       await closeMainWindow({ clearRootSearch: false, popToRootType: PopToRootType.Suspended });
 
+      setTimeout(() => {
+        popToRoot({ clearSearchBar: true });
+      }, 2500);
+
       await showToast({
         style: Toast.Style.Animated,
         title: `Adding concept ${titleText} to Notion`,
@@ -42,7 +57,7 @@ export default function Command() {
     } else {
       await showToast({
         style: Toast.Style.Failure,
-        title: `Missing concept name to content!`,
+        title: getMessage(),
       });
     }
   }
@@ -61,9 +76,22 @@ export default function Command() {
 
   return (
     <List isShowingDetail searchBarPlaceholder="Concept name" onSearchTextChange={setTitleText}>
+      {searchPages?.map((p) => (
+        <List.Item
+          key={p.id}
+          icon={p.icon}
+          title={p.title}
+          actions={
+            <ActionPanel>
+              <Action title="Add Concept" onAction={onAction} />
+            </ActionPanel>
+          }
+          detail={<List.Item.Detail markdown={clipboardText} />}
+        />
+      ))}
       <List.Item
-        icon="list_icon.png"
-        title={""}
+        icon={Icon.Plus}
+        title={titleText}
         actions={
           <ActionPanel>
             <Action title="Add Concept" onAction={onAction} />
